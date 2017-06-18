@@ -25,6 +25,23 @@
   \fi
 \fi
 
+% From: https://tex.stackexchange.com/a/184924
+\usepackage{etoolbox}%
+\usepackage{xstring}%
+\usepackage{catchfile}%
+
+\newcommand{\getenv}[2][]{%
+  \CatchFileEdef{\temp}{"|kpsewhich --var-value #2"}{}%
+  \if\relax\detokenize{#1}\relax\temp\else\let#1\temp\fi}
+%\getenv[\INCLUDE]{\string INCLUDE}
+
+\def\newtemp{}%
+\newcommand{\newgetenv}[2][]{%
+  \CatchFileEdef{\temp}{"|kpsewhich --var-value #2"}{}%
+  \StrGobbleRight{\temp}{1}[\newtemp]%  Delete the trailing whitespace character
+  \if\relax\detokenize{#1}\relax\temp\else\edef#1{\newtemp}\fi%
+}%
+
 %
 \ifx \getenv{Introduction}UNDEFINED
     \def \Introduction{Introduction.draft0}
@@ -32,8 +49,15 @@
     \def \Introduction{\getenv{Introduction}}
 \fi
 
+%
+\def\A{ICT}
+\newgetenv[\ICT]{\A}
+\ifx\ICT\A \def\ICT{FOO} \else \def\ICT{BAR} \fi
+
 \begin{document}
 
 \input{\Introduction}
+ICT=\show\ICT;
+ICT=\ICT;
 
 \end{document}
