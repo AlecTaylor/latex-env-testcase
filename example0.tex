@@ -1,0 +1,39 @@
+\documentclass[a4paper,12pt]{letter}
+
+\usepackage{ifxetex, ifluatex}
+%
+\ifxetex
+  \usepackage{catchfile}
+  \newcommand\getenv[2][]{%
+    \immediate\write18{kpsewhich --var-value #2 > \jobname.tmp}%
+    \CatchFileDef{\temp}{\jobname.tmp}{\endlinechar=-1}%
+    \ifx\temp\empty\def\temp{UNDEFINED}\fi
+    \if\relax\detokenize{#1}\relax\temp\else\let#1\temp\fi}
+\else
+  \ifluatex
+    \newcommand\getenv[2][]{%
+      \edef\temp{\directlua{tex.sprint(
+        kpse.var_value("\luatexluaescapestring{#2}") or "" ) }}%
+      \ifx\temp\empty\def\temp{UNDEFINED}\fi
+      \if\relax\detokenize{#1}\relax\temp\else\let#1\temp\fi}
+  \else
+    \usepackage{catchfile}
+    \newcommand{\getenv}[2][]{%
+      \CatchFileEdef{\temp}{"|kpsewhich --var-value #2"}{\endlinechar=-1}%
+      \ifx\temp\empty\def\temp{UNDEFINED}\fi
+      \if\relax\detokenize{#1}\relax\temp\else\let#1\temp\fi}
+  \fi
+\fi
+
+%
+\ifx \getenv{Introduction}UNDEFINED
+    \def \Introduction{Introduction.draft0}
+\else
+    \def \Introduction{\getenv{Introduction}}
+\fi
+
+\begin{document}
+
+\input{\Introduction}
+
+\end{document}
